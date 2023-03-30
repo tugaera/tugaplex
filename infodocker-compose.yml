@@ -55,7 +55,7 @@ x-common-keys-media: &common-keys-media
   restart: "no"
 
 # Keys common to some of the core services that we always to automatically restart on failure
-x-common-keys-core-t2: &common-keys-core
+x-common-keys-core-t2: &common-keys-core-t2
   networks:
     - t2_proxy
   security_opt:
@@ -63,7 +63,7 @@ x-common-keys-core-t2: &common-keys-core
   restart: always
  
 # Keys common to some of the dependent services/apps
-x-common-keys-apps-t2: &common-keys-apps
+x-common-keys-apps-t2: &common-keys-apps-t2
   networks:
     - t2_proxy
   security_opt:
@@ -71,7 +71,7 @@ x-common-keys-apps-t2: &common-keys-apps
   restart: unless-stopped
  
 # Keys common to some of the services in media-services.txt
-x-common-keys-media-t2: &common-keys-media
+x-common-keys-media-t2: &common-keys-media-t2
   networks:
     - t2_proxy
   security_opt:
@@ -83,13 +83,14 @@ services:
 
   # Portainer - WebUI for Containers
   portainer:
-    <<: *common-keys-core # See EXTENSION FIELDS at the top
+    <<: *common-keys-core-t2 # See EXTENSION FIELDS at the top
     container_name: portainer
     image: portainer/portainer-ce:latest
     command: -H unix:///var/run/docker.sock # Use Docker Socket Proxy and comment this line out, for improved security.
     # command: -H tcp://socket-proxy:2375 # Use this instead, if you have Socket Proxy enabled.
     networks:
-      - npm_proxy
+      # - npm_proxy
+      - t2_proxy
     ports: # Comment out if using Nginx Proxy Manager to access portainer WebUI.
       - "9000:9000"
     volumes:
@@ -97,66 +98,22 @@ services:
       - $DOCKERDIR/appdata/portainer/data:/data # Change to local directory if you want to save/transfer config locally.
     environment:
       - TZ=$TZ
-  # Gluetun - VPN Client for Docker Containers and More
-  gluetun:
-    image: qmcgaw/gluetun
-    container_name: gluetun
-    restart: always
-    # For Static IP
-    networks:
-    # For Static IP
-      npm_proxy:
-        ipv4_address: 192.168.89.250 # You can specify a static IP
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun
-    ports:
-      - "8080:8080" # qBittorrent
-    volumes:
-      - $S3PLUSDIR/SharedDocker/gluetun:/gluetun
-    environment:
-      TZ: $TZ
-      # Wireguard
-      VPN_SERVICE_PROVIDER: surfshark
-      VPN_TYPE: wireguard
-      WIREGUARD_PRIVATE_KEY: $SURFSHARK_WG_PRIVATE_KEY
-      WIREGUARD_ADDRESSES: 10.14.0.2/16
-      # SERVER_COUNTRIES: Netherlands
-      # # OpenVPN
-      # VPN_SERVICE_PROVIDER: fastestvpn
-      # VPN_TYPE: openvpn
-      # OPENVPN_USER: $FASTESTVPN_USERNAME
-      # OPENVPN_USER: $FASTESTVPN_PASSWORD 
-      
-  # Nginx Proxy Manager - Reverse Proxy with LetsEncrypt
-  npm:
-    <<: *common-keys-core # See EXTENSION FIELDS at the top
-    container_name: nginx-proxy-manager
-    image: 'jc21/nginx-proxy-manager:latest'
-    # For Static IP
-    networks:
-    # For Static IP
-      npm_proxy:
-        ipv4_address: 192.168.89.254 # You can specify a static IP
-    # For Dynamic IP
-    # networks:
-    #  - npm_proxy
-    ports:
-      - '80:80' # Public HTTP Port. Port Forwarding on Router is ON.
-      - '443:443' # Public HTTPS Port. Port Forwarding on Router is ON.
-      - '81:81' # Admin Web Port. Port Forwarding on Router is OFF. Internal Home Network Access only - 192.168.89.254:81.
-    volumes:
-      - $S3PLUSDIR/SharedDocker/npm/config:/config 
-      - $S3PLUSDIR/SharedDocker/letsencrypt:/etc/letsencrypt
-      - $S3PLUSDIR/SharedDocker/npm/data:/data
-    environment:
-      DB_SQLITE_FILE: "/config/database.sqlite"
-      DISABLE_IPV6: 'true'
-      
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.portainer-rtr.entrypoints=https"
+      - "traefik.http.routers.portainer-rtr.rule=Host(`portainer.$DOMAINNAME_CLOUD_SERVER`)"
+      - "traefik.http.routers.portainer-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.portainer-rtr.middlewares=chain-basic-auth@file"
+      # - "traefik.http.routers.portainer-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.portainer-rtr.service=portainer-svc"
+      - "traefik.http.services.portainer-svc.loadbalancer.server.port=9000"
+
   # Traefik 2 - Reverse Proxy
   traefik:
-    <<: *common-keys-core # See EXTENSION FIELDS at the top
+    <<: *common-keys-core-t2 # See EXTENSION FIELDS at the top
     container_name: traefik
     image: traefik:2.7
     command: # CLI arguments
@@ -194,7 +151,7 @@ services:
       - --providers.file.directory=/rules # Load dynamic configuration from one or more .toml or .yml files in a directory
       # - --providers.file.filename=/path/to/file # Load dynamic configuration from a file
       - --providers.file.watch=true # Only works on top level files in the rules folder
-      - --certificatesResolvers.dns-cloudflare.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory # LetsEncrypt Staging Server - uncomment when testing
+      # - --certificatesResolvers.dns-cloudflare.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory # LetsEncrypt Staging Server - uncomment when testing
       - --certificatesResolvers.dns-cloudflare.acme.email=$CLOUDFLARE_EMAIL
       - --certificatesResolvers.dns-cloudflare.acme.storage=/acme.json
       - --certificatesResolvers.dns-cloudflare.acme.dnsChallenge.provider=cloudflare
@@ -220,8 +177,8 @@ services:
       - $S3PLUSDIR/SharedDocker/traefik2/rules/cloudserver:/rules # file provider directory
       - /var/run/docker.sock:/var/run/docker.sock:ro # If you use Docker Socket Proxy, comment this line out
       - $S3PLUSDIR/SharedDocker/traefik2/acme/acme.json:/acme.json # cert location - you must create this empty file and change permissions to 600
-      - $S3PLUSDIR/SharedDocker/traefik/logs:/logs # for fail2ban or crowdsec
-      - $S3PLUSDIR/SharedDocker/traefik/shared:/shared
+      - $S3PLUSDIR/SharedDocker/traefik2/logs:/logs # for fail2ban or crowdsec
+      - $S3PLUSDIR/SharedDocker/traefik2/shared:/shared
     environment:
       - TZ=$TZ
       - CF_API_EMAIL=$CLOUDFLARE_EMAIL
@@ -238,7 +195,7 @@ services:
       - "traefik.http.routers.traefik-rtr.entrypoints=https"
       - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$DOMAINNAME_CLOUD_SERVER`)"
       - "traefik.http.routers.traefik-rtr.tls=true" # Some people had 404s without this
-      - "traefik.http.routers.traefik-rtr.tls.certresolver=dns-cloudflare" # Comment out this line after first run of traefik to force the use of wildcard certs
+      # - "traefik.http.routers.traefik-rtr.tls.certresolver=dns-cloudflare" # Comment out this line after first run of traefik to force the use of wildcard certs
       - "traefik.http.routers.traefik-rtr.tls.domains[0].main=$DOMAINNAME_CLOUD_SERVER"
       - "traefik.http.routers.traefik-rtr.tls.domains[0].sans=*.$DOMAINNAME_CLOUD_SERVER"
       # - "traefik.http.routers.traefik-rtr.tls.domains[1].main=$DOMAINNAME2" # Pulls main cert for second domain
@@ -246,12 +203,76 @@ services:
       ## Services - API
       - "traefik.http.routers.traefik-rtr.service=api@internal"
       ## Middlewares
-      - "traefik.http.routers.traefik-rtr.middlewares=middlewares-basic-auth@file"
-  
-  
+      # - "traefik.http.routers.traefik-rtr.middlewares=middlewares-basic-auth@file"
+      # - "traefik.http.routers.traefik-rtr.middlewares=middlewares-rate-limit@file,middlewares-basic-auth@file"
+      # - "traefik.http.routers.traefik-rtr.middlewares=middlewares-rate-limit@file,middlewares-https-redirectscheme@file,middlewares-basic-auth@file"
+      # - "traefik.http.routers.traefik-rtr.middlewares=middlewares-rate-limit@file,middlewares-https-redirectscheme@file,middlewares-secure-headers@file,middlewares-basic-auth@file"
+      # - "traefik.http.routers.traefik-rtr.middlewares=middlewares-rate-limit@file,middlewares-https-redirectscheme@file,middlewares-secure-headers@file,middlewares-basic-auth@file,middlewares-compress@file"
+      - "traefik.http.routers.traefik-rtr.middlewares=chain-basic-auth@file"
+      
+  # Heimdall - Application Dashboard
+  heimdall:
+    <<: *common-keys-core-t2 # See EXTENSION FIELDS at the top
+    image: lscr.io/linuxserver/heimdall
+    container_name: heimdall
+    # ports:
+      # - "$HEIMDALL_HTTP_PORT:80" # 80 used by Traefik
+      # - "$HEIMDALL_HTTPS_PORT:443" # 443 used by Traefik. Disabled because we will put Heimdall behind proxy.
+    volumes:
+      - $S3PLUSDIR/SharedDocker/heimdall:/config
+    environment:
+      <<: *default-tz-puid-pgid
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.heimdall-rtr.entrypoints=https"
+      - "traefik.http.routers.heimdall-rtr.rule=Host(`$DOMAINNAME_CLOUD_SERVER`,`www.$DOMAINNAME_CLOUD_SERVER`)"
+      - "traefik.http.routers.portainer-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.heimdall-rtr.middlewares=chain-basic-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.heimdall-rtr.service=heimdall-svc"
+      - "traefik.http.services.heimdall-svc.loadbalancer.server,port=80"
+      
+  # Nginx Proxy Manager - Reverse Proxy with LetsEncrypt
+  npm:
+    <<: *common-keys-core-t2 # See EXTENSION FIELDS at the top
+    container_name: nginx-proxy-manager
+    image: 'jc21/nginx-proxy-manager:latest'
+    # For Static IP
+    #networks:
+    # For Static IP
+      #npm_proxy:
+        #ipv4_address: 192.168.89.254 # You can specify a static IP
+    # For Dynamic IP
+    # networks:
+    #  - npm_proxy
+    #ports:
+      #- '80:80' # Public HTTP Port. Port Forwarding on Router is ON.
+      #- '443:443' # Public HTTPS Port. Port Forwarding on Router is ON.
+      #- '81:81' # Admin Web Port. Port Forwarding on Router is OFF. Internal Home Network Access only - 192.168.89.254:81.
+    volumes:
+      - $S3PLUSDIR/SharedDocker/npm/config:/config 
+      - $S3PLUSDIR/SharedDocker/letsencrypt:/etc/letsencrypt
+      - $S3PLUSDIR/SharedDocker/npm/data:/data
+    environment:
+      DB_SQLITE_FILE: "/config/database.sqlite"
+      DISABLE_IPV6: 'true'
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.npm-rtr.entrypoints=https"
+      - "traefik.http.routers.npm-rtr.rule=Host(`proxy.$DOMAINNAME_CLOUD_SERVER`)"
+      ## Middlewares
+      - "traefik.http.routers.portainer-rtr.middlewares=chain-basic-auth@file"
+      # - "traefik.http.routers.portainer-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.npm-rtr.service=npm-svc"
+      - "traefik.http.services.npm-svc.loadbalancer.server.port=80"
+    
   # Plex - Media Server
   plexms:
-    <<: *common-keys-media # See EXTENSION FIELDS at the top
+    <<: *common-keys-media-t2 # See EXTENSION FIELDS at the top
     image: plexinc/pms-docker:public
     container_name: plexms
     ports:
@@ -278,6 +299,50 @@ services:
       PLEX_UID: $PUID
       PLEX_GID: $PGID
       ADVERTISE_IP: "http://$SERVER_IP:32400/,$PLEX_EXTERNAL_DOMAIN"
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.plexms-rtr.entrypoints=https"
+      - "traefik.http.routers.plexms-rtr.rule=Host(`betamax.$DOMAINNAME_CLOUD_SERVER`)"
+      - "traefik.http.routers.plexms-rtr.tls=true"
+      ## Middlewares
+      # - "traefik.http.routers.portainer-rtr.middlewares=chain-basic-auth@file"
+      - "traefik.http.routers.portainer-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.plexms-rtr.service=plexms-svc"
+      - "traefik.http.services.plexms-svc.loadbalancer.server.port=32400"
+      
+  # Gluetun - VPN Client for Docker Containers and More
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    restart: always
+    # For Static IP
+    networks:
+    # For Static IP
+      npm_proxy:
+        ipv4_address: 192.168.89.250 # You can specify a static IP
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    ports:
+      - "8080:8080" # qBittorrent
+    volumes:
+      - $S3PLUSDIR/SharedDocker/gluetun:/gluetun
+    environment:
+      TZ: $TZ
+      # Wireguard
+      VPN_SERVICE_PROVIDER: surfshark
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY: $SURFSHARK_WG_PRIVATE_KEY
+      WIREGUARD_ADDRESSES: 10.14.0.2/16
+      # SERVER_COUNTRIES: Netherlands
+      # # OpenVPN
+      # VPN_SERVICE_PROVIDER: fastestvpn
+      # VPN_TYPE: openvpn
+      # OPENVPN_USER: $FASTESTVPN_USERNAME
+      # OPENVPN_USER: $FASTESTVPN_PASSWORD 
       
   # Bazarr - Subtitle Management
   bazarr:
@@ -329,7 +394,7 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
     environment:
       <<: *default-tz-puid-pgid
-
+      
   # Prowlarr - Indexer manager/proxy
   prowlarr:
     <<: *common-keys-media # See EXTENSION FIELDS at the top
@@ -348,12 +413,13 @@ services:
   # TransmissionBT - Torrent Downloader
   # For Proxmox LXC Containers - https://pve.proxmox.com/wiki/OpenVPN_in_LXC
   transmission-vpn:
+    <<: *common-keys-apps-t2 # See EXTENSION FIELDS at the top
     image: haugene/transmission-openvpn:latest
     container_name: transmission-vpn
     restart: unless-stopped
-    networks:
-      npm_proxy:
-        ipv4_address: 192.168.89.169
+    #networks:
+      #npm_proxy:
+        #ipv4_address: 192.168.89.169
     ports:
       - "9091:9091"
     cap_add:
@@ -397,6 +463,17 @@ services:
       TRANSMISSION_WATCH_DIR_ENABLED: "true"
       TRANSMISSION_DOWNLOAD_DIR: /data/completed
       LOG_TO_STDOUT: "true"
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.transmission-vpn-rtr.entrypoints=https"
+      - "traefik.http.routers.transmission-vpn-rtr.rule=Host(`trans.$DOMAINNAME_CLOUD_SERVER`)"
+      ## Middlewares
+      - "traefik.http.routers.portainer-rtr.middlewares=chain-basic-auth@file"
+      # - "traefik.http.routers.portainer-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.transmission-vpn-rtr.service=transmission-vpn-svc"
+      - "traefik.http.services.transmission-vpn-svc.loadbalancer.server.port=9091"
       
   # qBittorrent - Torrent downloader
   qbittorrent:

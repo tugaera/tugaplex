@@ -1,0 +1,8 @@
+secrets:
+    general: {quality_min: '720p+ !dvdrip', quality_movies: '1080p+ !dvdrip', quality_series: '720p+ hdtv+ h264+'}
+    imdb: {list: ls0XXXXXX, min_score: 6.5, min_votes: 5000, min_year: 2019, user_id: ur1XXXXXXXX}
+    list: {imdbPlexMovies: imdbPlexMovies, traktPlexMovies: traktPlexMovies, watchlist: watchlist}
+    rss: {limetorrents: 'https://www.limetorrents.info/rss/16/', rarbgproxied: 'https://rarbgproxied.org/rssdd.php?categories=14;15;16;17;21;22;42;44;45;46;47;48', showrss: 'http://showrss.info/user/227346.rss?magnets=true&namespaces=true&name=null&quality=null&re=null', yts: 'https://yts.lt/rss', zooqle: 'https://zooqle.com/search?q=1080p+after%3A1W+category%3AMovies&fmt=rss'}
+    trakt: {list: XXXXXX, username: XXXXXXX}
+    transmission: {host: 19X.XXX.XXX.XXX, password: XXXX, port: 9091, username: XXXXX}
+    tv: {series: ['Carnival Row', 'Game of Thrones', 'NCIS: Los Angeles', NCIS, 'Chicago Med', 'NCIS: New Orleans', 'The Blacklist', 'The Flash', 'Hawaii Five-0', 'The Good Doctor', FBI, 'The Rookie', 9-1-1, S.W.A.T., 'Mangun p.i.', 'New Amsterdam', Sherlock, 'Grey''s Anatomy'], series_alt: ['The Flash 2014', 'S W A T 2017', 'Hawaii Five 0 2010']}

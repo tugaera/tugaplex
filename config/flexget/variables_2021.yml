@@ -1,0 +1,57 @@
+email:
+  from: notifyexample@email.com
+  password: password123
+  to: notifymeexample@email.com
+entry:
+  list: discover-movies
+  list2: discover-series
+imdb:
+  list: lsXXXXX
+  login: example@email.com
+  password: password123
+  username: urXXXX
+movie:
+  list: wanted
+  list2: watchlist
+plex:
+  password: password123
+  server: http://host
+  token: XXXXXXXXXXXXX
+  username: username
+quality:
+  movies: 720p+ webrip+ h264+
+  series: 720p hdtv+ h264
+radarr:
+  key: XXXXXXXXXXXXXXXX
+  url: http://host
+rss:
+  url1: https://rarbg.to/rssdd.php
+  url2: https://rarbgproxied.org/rssdd.php?categories=14;15;16;17;21;22;42;44;45;46;47;48
+  url3: https://yts.lt/rss
+  url4: https://www.limetorrents.info/rss/16/
+  url5: https://zooqle.com/search?q=1080p+after%3A1W+category%3AMovies&fmt=rss
+  url6: https://showrss.info/other/shows.rss
+series:
+  list:
+    - Serie Name 
+    - Another serie name
+sonarr:
+  key: XXXXXXXXXXXXXXXXX
+  url: http://host
+subliminal:
+  addic7ed:
+    password: password123
+    username: username
+  opensubtitles:
+    password: password123
+    username: username
+trakt:
+  list: wanted
+  list2: pursue
+  list3: watched
+  list4: viewed
+  username: username
+transmission:
+  host: host
+  password: password123
+  username: username

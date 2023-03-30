@@ -1,0 +1,723 @@
+web_server:
+  web_ui: yes
+
+variables: variables.yml
+
+templates:
+  global:
+    seen: local # Use this so you won't affect other
+    seen_info_hash: local # only consider previously grabbed torrents within the current task
+    no_entries_ok: yes
+    trakt_lookup: yes
+    notify:
+      entries: # Entries, Task, Abort
+        # template: html  # Optional, if you want html instead of plain text
+        title: "entries: Notification title."
+        # message: |+
+          # {% for entry in task.entries %}
+          # An unreleased episode was detected: {{ entry.trakt_series_name }} -     S{{ entry.trakt_season }}E{{ entry.trakt_episode|pad(2) }}
+          # Released on {{ entry.trakt_ep_first_aired|formatdate("%Y-%m-%d")}}
+          # {% endfor %}
+        via:
+          - email:
+              from: 'notifymeportugal@example.com'
+              to:
+                - 'notifymeportugal@example.org'
+              smtp_host: smtp.gmail.com
+              smtp_port: 587
+              smtp_username: 'notifymeportugal@example.com'
+              smtp_password: '123Password'
+              smtp_tls: yes
+              html: yes # To parse template as HTML
+      task:
+        always_send: no # yes # no entries were accepted to task.
+        title: "task: Notification title."
+        # template: "Specify message from a template on disk."
+        via:
+          - email:
+              from: 'notifymeportugal@example.com'
+              to:
+                - 'notifymeportugal@example.org'
+              smtp_host: smtp.gmail.com
+              smtp_port: 587
+              smtp_username: 'notifymeportugal@example.com'
+              smtp_password: '123Password'
+              smtp_tls: yes
+              html: yes # To parse template as HTML
+      abort:
+        title: "abort: Notification title."
+        # message: "Notification body."
+        via:
+          - email:
+              from: 'notifymeportugal@example.com'
+              to:
+                - 'notifymeportugal@example.org'
+              smtp_host: smtp.gmail.com
+              smtp_port: 587
+              smtp_username: 'notifymeportugal@example.com'
+              smtp_password: '123Password'
+              smtp_tls: yes
+              html: yes # To parse template as HTML
+  contemplated-movies:
+    seen: local  # We don't want accepted movies on this feed to affect actual download feed
+    seen_info_hash: local # only consider previously grabbed torrents within the current task
+    disable:
+      - seen
+      - seen_info_hash
+    entry_list: '{? entry.list ?}'
+    accept_all: yes
+    list_add:
+      - trakt_list:
+          account: '{? trakt.username ?}'
+          username: '{? trakt.username ?}'
+          list: '{? trakt.list5 ?}'
+          type: movies
+  wanted-movies:
+    seen: local  # We don't want accepted movies on this feed to affect actual download feed
+    seen_info_hash: local # only consider previously grabbed torrents within the current task
+    trakt_list:
+      account: '{? trakt.username ?}'
+      username: '{? trakt.username ?}'
+      list: '{? trakt.list ?}'
+      type: movies
+    # imdb_list:
+      # login: '{? imdb.username ?}'
+      # password: '{? imdb.password ?}'
+      # list: '{? imdb.list ?}'
+    # imdb_watchlist:
+      # user_id: ur116917659
+      # list: ls099027602
+    # rss: "http://rss.imdb.com/user/{? imdb.username ?}/{? imdb.list ?}"
+    imdb_lookup: yes # can also use trakt_lookup or tmdb_lookup
+    trakt_lookup: yes # can also use imdb_lookup or tmdb_lookup
+    tmdb_lookup: yes # can also use imdb_lookup or trakt_lookup
+    accept_all: yes
+    list_add:
+      - movie_list: '{? movie.list ?}'  # you can call this whatever you want
+  # $ flexget movie-list all
+  # $ flexget movie-list list watchlist
+  discover-movies:
+    imdb_lookup: yes # can also use trakt_lookup or tmdb_lookup
+    trakt_lookup: yes # can also use imdb_lookup or tmdb_lookup
+    tmdb_lookup: yes # can also use imdb_lookup or trakt_lookup
+    # exists_movie:
+      # path: /path/to/movies
+      # [type]: {dirs|files}
+      # [allow_different_qualities]: {better|yes|no}
+      # [lookup]: {imdb|no}
+    discover:
+      what:
+        - movie_list:
+            list_name: '{? movie.list ?}'
+            # strip_year: yes
+        - movie_list: '{? movie.list2 ?}'
+      from:
+        # - piratebay:
+            # category: "highres movies"
+            # sort_by: seeds
+            # sort_reverse: no
+            # url: https://thepiratebay.org
+            # url: https://pirateproxy.ink
+        - rarbg:
+            category: [14, 48, 17, 44, 45, 47, 50, 51, 52, 42, 46, 54]
+            # category:
+              # - x264 720p
+              # - x264 1080p
+              # - HDTV
+            sorted_by: last
+            # limit: 100
+            # ranked: false
+        # - torrentz: good
+        # - search_rss:
+            # url: http://url/q={{search_term}}
+            # link:
+              # - link
+              # - magneturi
+        #- torznab:
+        #    website: http://nostalgic_babbage:9117/api/v2.0/indexers/yts/results/torznab/
+        #    apikey: pq5xq1pty4tl177e1n8awtc0iza69dtq
+        #    searcher: movie
+      limit: 100 # Set max results from each search engine.
+      interval: 6 hours # 50 minutes # Time between trying searches again.
+      release_estimations: ignore
+        #optimistic: 30 days # starts searching before release date.
+    torrent_alive: 10 # Will reject results with less than 10 seeds
+    quality: 720p+ webrip+ h264 # Make sure no screeners or cams are downloaded
+    #quality: webrip+ h264 # Make sure no screeners or cams are downloaded
+    proper_movies: 24 hours
+    sort_by:
+      field: torrent_seeds # quality.resolution
+      reverse: yes
+    list_match:
+      from:
+        - entry_list: '{? entry.list ?}'
+        - radarr_list:
+            base_url: '{? radarr.url ?}'
+            api_key: '{? radarr.key ?}'
+            port: 7878
+            # only_monitored: yes
+            # include_data: yes
+            # only_use_cutoff_quality: yes
+      action: reject
+      remove_on_match: no
+      single_match: no
+    best_quality:
+      # on_best: accept <--------------------------------------------------------------
+      on_best: do_nothing
+      on_lower: reject
+    # crossmatch: <--------------------------------------------------------------
+      # from:
+        # - movie_list: '{? movie.list ?}'
+      # fields:
+        # - movie_name
+        # # - title
+      # action: accept
+      # exact: yes
+      # all_fields: no
+    # parsing:
+      # movie: guessit
+    list_match:
+      from:
+        - movie_list: 
+            list_name: '{? movie.list ?}'
+            # strip_year: yes
+        - movie_list: '{? movie.list2 ?}'
+        - trakt_list:
+            account: '{? trakt.username ?}'
+            username: '{? trakt.username ?}'
+            list: '{? trakt.list ?}'
+            type: movies
+            # strip_dates: yes
+      action: accept
+      remove_on_match: yes
+      single_match: no
+    list_add:
+      - entry_list: '{? entry.list ?}'
+      - trakt_list:
+          account: '{? trakt.username ?}'
+          username: '{? trakt.username ?}'
+          list: '{? trakt.list5 ?}'
+          type: movies
+      - trakt_list:
+          account: '{? trakt.username ?}'
+          username: '{? trakt.username ?}'
+          list: '{? trakt.list3 ?}'
+          type: movies
+    # list_remove:
+      # - movie_list: '{? movie.list ?}'
+    seen_movies:
+      matching: strict # reject all entries that have not been identified as movies
+      scope: local # movie to be accepted once in this task
+    content_size:
+      min: 700
+      max: 2900
+      # strict: no
+    # magnets: no
+    # convert_magnet: # apk add libtorrent
+      # timeout: 10 seconds # minutes
+      # force: yes
+    # download: /home/flexget/torrents # You could use another output plugin ins    tead of this (deluge, transmission)
+    set:
+      path: '/data/completed'
+    # accept_all: yes # <-------------------------------------------------------------------------- FORCE
+  inject-movies:
+    imdb_lookup: yes # can also use trakt_lookup or tmdb_lookup
+    trakt_lookup: yes # can also use imdb_lookup or tmdb_lookup
+    tmdb_lookup: yes # can also use imdb_lookup or trakt_lookup
+    discover:
+      what:
+        - movie_list:
+            list_name: '{? movie.list ?}'
+            # strip_year: yes
+        - movie_list: '{? movie.list2 ?}'
+      from:
+        - rarbg:
+            category: [14, 48, 17, 44, 45, 47, 50, 51, 52, 42, 46, 54]
+            sorted_by: last
+    quality: 720p+ webrip+ h264 # Make sure no screeners or cams are downloaded
+    proper_movies: 24 hours
+    sort_by:
+      field: torrent_seeds # quality.resolution
+      reverse: yes
+    list_match:
+      from:
+        - entry_list: '{? entry.list ?}'
+        - radarr_list:
+            base_url: '{? radarr.url ?}'
+            api_key: '{? radarr.key ?}'
+            port: 7878
+            # only_monitored: yes
+            # include_data: yes
+            # only_use_cutoff_quality: yes
+      action: reject
+      remove_on_match: no
+      single_match: no
+    best_quality:
+      on_best: do_nothing
+      on_lower: reject
+    list_add:
+      - entry_list: '{? entry.list ?}'
+      - trakt_list:
+          account: '{? trakt.username ?}'
+          username: '{? trakt.username ?}'
+          list: '{? trakt.list5 ?}'
+          type: movies
+      - trakt_list:
+          account: '{? trakt.username ?}'
+          username: '{? trakt.username ?}'
+          list: '{? trakt.list3 ?}'
+          type: movies
+    seen_movies:
+      matching: strict # reject all entries that have not been identified as movies
+      scope: local # movie to be accepted once in this task
+    content_size:
+      min: 700
+      max: 2900
+      # strict: no
+    set:
+      path: '/data/completed'
+    # accept_all: yes # <-------------------------------------------------------------------------- FORCE
+  filter_results_a:
+    # another task
+    list_clear:
+      what:
+        - entry_list: search_results
+    # get all 
+    list_add:
+      - entry_list: search_results
+    # end task
+    entry_list: search_results
+    # do filtering and output
+  pursue-series:
+    seen: local
+    seen_info_hash: local
+    configure_series:
+      settings:
+        # Configure all the series options to your taste
+        quality: 720p
+        path: /data/completed # /data/tv/{{series_name}}/Season {{series_season}}/  # This will sort your downloads if you are using one of the output plugins which supports it
+        identified_by: ep
+      from:
+        trakt_list:
+          account: '{? trakt.username ?}'
+          username: '{? trakt.username ?}'
+          list: '{? trakt.list2 ?}'
+          type: shows
+  pursue-episodes:
+    seen: local
+    seen_info_hash: local
+    trakt_list:
+      username: '{? trakt.username ?}'
+      account: '{? trakt.username ?}'
+      list: '{? trakt.list2 ?}'
+      type: episodes
+    accept_all: yes
+    set_series_begin: yes
+    list_remove:
+      - trakt_list:
+          username: '{? trakt.username ?}'
+          account: '{? trakt.username ?}' # required if list is not public
+          list: '{? trakt.list2 ?}'
+          type: episodes
+    list_add:
+      - trakt_list:
+          username: '{? trakt.username ?}'
+          account: '{? trakt.username ?}' # required if list is not public
+          list: '{? trakt.list2 ?}'
+          type: shows
+  # $ flexget series list
+  # $ flexget series forget show_name
+  discover-series:
+    exists_series: /downloads/tv/
+    series:
+      settings:
+        seasons:
+          identified_by: ep
+          # tracking: backfill
+          season_packs: only # yes
+        seriesgroup:
+          timeframe: 12 hours
+          target: 720p
+          propers: 1 days
+          quality: 720p
+          exact: yes # auto
+          set:
+            path: /data/completed # /data/tv/{{series_name}}/Season {{series_season}}
+        shows:
+          # parse_only: yes # Series plugin will not accept or reject any entries, merely fill in all metadata fields.
+          identified_by: ep
+          tracking: backfill
+      seasons:
+        - 'Tiger King: Murder, Mayhem and Madness'
+      seriesgroup:
+        - Devs
+        - "Mythic Quest: Raven's Banquet"
+        - 'I Am Not Okay with This':
+            set:
+              path: /data/completed # /data/tv/custom/{{series_name}}/Season {{series_season}}
+      shows:
+        - 'Narcos: Mexico':
+            begin: S02E09
+    discover:
+      what:
+        - next_series_episodes:
+            from_start: yes
+            # backfill: yes
+        - next_series_seasons:
+            from_start: yes
+            # backfill: yes
+      from:
+        - rarbg: 
+            category: 
+              - HDTV
+              - x264 720p
+        - search_rss: 
+            url: '{? rss.url6 ?}'
+            link:
+              - link
+              - magneturi
+      interval: 1 hour  # Search for expected episodes again every hour
+    sort_by:
+      field: quality
+      reverse: yes
+    quality: webrip+ 720p
+    all_series: yes
+    list_add:
+      - entry_list: '{? entry.list2 ?}'
+      - trakt_list:
+          account: '{? trakt.username ?}'
+          username: '{? trakt.username ?}'
+          list: '{? trakt.list4 ?}'
+          type: episodes # shows
+      - trakt_list:
+          account: '{? trakt.username ?}'
+          username: '{? trakt.username ?}'
+          list: '{? trakt.list3 ?}'
+          type: episodes
+    # download: /home/flexget/torrents # You could use another output plugin inste    ad of this (deluge, transmission)
+  radarr-movies:
+    list_add:
+      - radarr_list:
+          base_url: '{? radarr.url ?}'
+          api_key: '{? radarr.key ?}'
+          port: 7878
+  sonarr-series:
+    list_add:
+      - sonarr_list:
+          base_url: '{? sonarr.url ?}'
+          port: 8989
+          api_key: '{? sonarr.key ?}'
+          ignore_episodes_with_files: true # Unmonitors any episodes with a file
+          ignore_episodes_without_files: true # Unmonitors any episodes without a file
+          search_missing_episodes: false # Searches for missing files
+          monitored: false # Allows you to set the whole series to monitored
+          season_folder: true # Allows you to set the season folder
+  plex-media-server:
+    plex:
+      section: 1
+      server: '{? plex.server ?}' # You get Server URL from https://plex.tv/users/cpms
+      port: 32400
+      selection: all # recentlyAdded
+      token: '{? plex.token ?}' # only use token ore user/pw not both!
+      # username: '{? plex.username ?}'
+      # password: '{? plex.password ?}'
+  watchlist-movies-tracker:
+    inputs:
+      # - rss: '{? rss.url1 ?}'
+      - rss: '{? rss.url2 ?}'
+      - rss: '{? rss.url3 ?}'
+  watchlist-movies-rss:
+    inputs:
+      - rss: '{? rssMovies.url1 ?}'
+      - rss: '{? rssMovies.url2 ?}' #
+      - rss: '{? rssMovies.url3 ?}' #
+      - rss: '{? rssMovies.url4 ?}' #
+      - rss: '{? rssMovies.url5 ?}'
+      - rss: '{? rssMovies.url6 ?}' #
+      - rss: '{? rssMovies.url7 ?}'
+      - rss: '{? rssMovies.url8 ?}' #
+      - rss: '{? rssMovies.url9 ?}' #
+      - rss: '{? rssMovies.url10 ?}' #
+    imdb_watchlist:
+      user_id: ur23892615
+      list: ls016522954
+  watchlist-movies:
+    seen: local
+    seen_info_hash: local
+    # disable: retry_failed
+    # rss: https://rarbg.to/rssdd.php
+    # if:
+      # - "'2020' not in title": reject
+    # quality: 720p+
+    imdb_lookup: yes # can also use trakt_lookup or tmdb_lookup
+    # trakt_lookup: yes # can also use imdb_lookup or tmdb_lookup
+    # tmdb_lookup: yes # can also use imdb_lookup or trakt_lookup
+    # require_field: imdb_id
+    imdb:
+      min_score: 5.9
+      min_votes: 2000
+      min_year: 2021
+      reject_genres:
+        - Documentary
+        - Animation
+      reject_languages:
+        - Hindi
+    # exists_movie:
+      # - /lists/of/dirs
+    list_match:
+      from:
+        - entry_list: '{? entry.list ?}'
+        - movie_list: '{? entry.list ?}'
+        - movie_list: '{? movie.list ?}'
+      action: reject
+      remove_on_match: no
+      single_match: no
+    seen_movies:
+      matching: strict
+      scope: local
+    metainfo_movie: yes
+    # accept_all: yes
+    list_add:
+      - pending_list: '{? movie.list2 ?}'
+      # - movie_list: '{? movie.list2 ?}'
+  watchlist-approved:
+    seen: local
+    seen_info_hash: local
+    pending_list: '{? movie.list2 ?}'
+    imdb_lookup: yes # can also use trakt_lookup or tmdb_lookup
+    trakt_lookup: yes # can also use imdb_lookup or tmdb_lookup
+    tmdb_lookup: yes # can also use imdb_lookup or trakt_lookup
+    # seen_movies:
+      # matching: strict
+      # scope: local
+    metainfo_movie: yes
+    list_match:
+      from:
+        - pending_list: '{? movie.list2 ?}'
+    # accept_all: yes
+    list_add:
+      - movie_list: '{? movie.list2 ?}'
+  download-movies:
+    rss: http://example.com/feed.xml
+    quality: 720p+
+    imdb_lookup: yes
+    imdb:
+      min_score: 6.2
+      min_votes: 5000
+      min_year: 2020
+      reject_genres:
+        - Documentary
+      reject_languages:
+        - Hindi
+    list_match:
+      from:
+        - movie_list: '{? movie.list ?}'
+    download: /home/flexget/torrents
+  transmissionrpc: # pip install transmissionrpc
+    transmission:
+      enabled: yes
+      host: '{? transmission.host ?}'
+      port: 9091
+      username: '{? transmission.username ?}'
+      password: '{? transmission.password ?}'
+      add_paused: no
+      path: /data/completed/tuga
+      ratio: 0.1
+      max_up_speed: 1
+      main_file_only: yes # get only the main file inside
+      main_file_ratio: 0.8
+      include_subs: true
+  transmissionrpc-clean:
+    from_transmission: yes
+    # only_complete: yes
+    disable: [seen, seen_info_hash]
+    if:
+      - transmission_progress == 100: accept
+      - not transmission_seed_ratio_ok: reject
+      - not transmission_idle_limit_ok: reject
+      # - transmission_ratio < 3.0: reject
+      # - transmission_date_done > now - timedelta(days=3): reject
+    regexp:
+      reject:
+        - my_tracker:
+            from: transmission_trackers
+      reject_excluding:
+        - "/storage/downloads/(tv|movies)":
+            from: transmission_downloadDir
+        - my_tracker:
+            from: transmission_trackers
+    transmission:
+      action: remove
+      # action: purge
+  get-subtitles: # pip install subliminal>=2.0
+    seen: local # seen shouldn't interfer with anything outside this subtitles task
+    seen_info_hash: local
+    filesystem:
+      path: 
+        - /downloads/movies          # unix
+      regexp: '.*\.(avi|mkv|mp4)$'  # only include filenames with these extensions
+      recursive: yes
+    accept_all: yes
+    subliminal:
+      languages:
+        - por
+      # alternatives:
+        # - eng
+      exact_match: yes
+      #only use the following providers
+      providers: 
+        - tvsubtitles
+        - opensubtitles
+        # - thesubdb
+      single: no
+      hearing_impaired: yes # Download subtitles for the hearing impaired when available
+      authentication:               #consider using the variables plugin
+        opensubtitles:
+          username: '{? subliminal.opensubtitles.username ?}'
+          password: '{? subliminal.opensubtitles.password ?}'
+  reject-entries:
+    regexp:
+      reject:
+        - (s|d)ub(s|bed)?\b: {from: title}                    # Block any subbed/dubbed/etc videos
+        - \b(duo|tri|quadri|tetra|penta)logy\b: {from: title} # Block series, only accept one at a time
+        - \b3-?D\b: {from: title}                             # I don't have any 3D displays
+        # - \btrailer\b: {from: title}                          # I've gotten a few trailers that matched as movies. VERY annoying
+        # - \bR5\b: {from: title}                               # The following are poor quality types that somehow got through the quality
+        # - \bWEBSCR\b: {from: title}                           # features usually due to the title including a keyword like "720p" as well
+        # - \bscreener\b: {from: title}
+        # - \bTS\b: {from: title}
+        - \bCam\b: {from: title}
+        # - '{C_P}': {from: title}                              # The following are groups with poor quality releases
+        # - TrTd TeaM: {from: title}
+        # - \[TNTVillage\]: {from: title}
+        # - \[facepalm\]: {from: title}
+        # - \bASAP\b: {from: title}
+        # - FASTSUB: {from: title}
+        # - VOSTFR: {from: title}
+        # - Subtitulado: {from: title}
+        # - \bNORDiC\b: {from: title}
+        # - \biPad\b: {from: title}
+        # - \b(ita|ger|fra|spa|swe|nor|nordic|fr|kor|esp|nl|pl|spanish)\b: {from: title}
+        # - \bR6\b: {from: title}
+        # - \bTemporada\b: {from: title}
+        # - \bDual\b: {from: title}
+        # - \bJapanese\b: {from: title}
+        # - \bJajji!\b
+        # - AC3: {from: title}                                  # Titles with AC3 are usually annoying P2P groups.
+        # - \bIMMERSE\b: {from: title}                       # AWFUL GROUPS
+        # - \bOzlem\b: {from: title}
+        # - \b0sec\b: {from: title}
+        # - \bPSYPHER\b: {from: title}
+  reject-list:
+    seen: local  # We don't want accepted movies on this feed to affect actual download feed
+    seen_info_hash: local # only consider previously grabbed torrents within the current task
+    trakt_list:
+      account: '{? trakt.username ?}'
+      username: '{? trakt.username ?}'
+      list: '{? trakt.list99 ?}'
+      type: movies
+    imdb_lookup: yes # can also use trakt_lookup or tmdb_lookup
+    trakt_lookup: yes # can also use imdb_lookup or tmdb_lookup
+    tmdb_lookup: yes # can also use imdb_lookup or trakt_lookup
+    accept_all: yes
+    list_add:
+      - movie_list: '{? entry.list99 ?}'  # you can call this whatever you want
+
+schedules:
+  # - tasks: '*'
+    # interval:
+      # minutes: 30
+  - tasks: 'task-r'
+    interval:
+      minutes: 5
+  - tasks: [task-w, task-a]
+    schedule:
+      hour: 6,15,23
+  - tasks: [task-m]
+    schedule:
+      hour: 6,23
+  - tasks: 'task-t'
+    schedule:
+      #minute: "*/30"
+      hour: "*/1"
+  - tasks: task-t-daily
+    schedule:
+      minute: 00
+      hour: 1
+  # - tasks:
+    # - 'task-x'
+    # - 'task-t'
+    # - 'task-l'
+    # interval:
+      # minutes: 1
+  # - tasks: task-a
+    # interval:
+      # hours: 2
+  #- tasks: [task-p, task-s]
+    #schedule:
+      #hour: 5
+
+tasks:
+  task-w:
+    priority: 11
+    template:
+      - no_global
+      - wanted-movies
+      # - contemplated-movies
+  task-m:
+    priority: 12 # run after the movie queue fill task
+    template:
+      - discover-movies
+      - reject-entries
+      - transmissionrpc
+      - radarr-movies
+    set:
+      path: '/data/completed/tuga'
+  task-p:
+    priority: 22
+    template:
+      - no_global
+      - pursue-episodes
+      - pursue-series
+  task-s:
+    priority: 23 # run after the series queue fill task
+    template:
+      - pursue-series
+      - discover-series
+      - transmissionrpc
+      - sonarr-series
+    set:
+      path: '/data/completed/tuga'
+  task-t:
+    priority: 33
+    template:
+      - watchlist-movies-tracker
+      - watchlist-movies
+  task-t-daily:
+    priority: 34
+    template:
+      - watchlist-movies-rss
+      - watchlist-movies
+  task-a:
+    priority: 44
+    template:
+      - no_global
+      - watchlist-approved
+  task-i:
+    priority: 55
+    template:
+      - inject-movies
+      - reject-entries
+      - transmissionrpc
+      - radarr-movies
+    set:
+      path: '/data/completed/tuga'
+  task-l:
+    priority: 99
+    template:
+      - no_global
+      - get-subtitles
+  task-r:
+    priority: 99
+    template:
+      - reject-list

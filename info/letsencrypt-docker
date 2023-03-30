@@ -1,0 +1,21 @@
+docker create \
+  --name=letsencrypt \
+  --cap-add=NET_ADMIN \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Europe/London \
+  -e URL=your_dub_domain.duckdns.org \
+  -e SUBDOMAINS=wildcard, \
+  -e VALIDATION=duckdns \
+  -e DNSPLUGIN=cloudflare `#optional` \
+  -e DUCKDNSTOKEN=XXXXX-XXXXXXXXXXX `#optional` \
+  -e EMAIL=letsencrypt@example.org `#optional` \
+  -e DHLEVEL=2048 `#optional` \
+  -e ONLY_SUBDOMAINS=false `#optional` \
+  -e EXTRA_DOMAINS=another_domain `#optional` \
+  -e STAGING=false `#optional` \
+  -p 443:443 \
+  -p 80:80 `#optional` \
+  -v /mnt/volume/letsencrypt_pelx:/config \
+  --restart unless-stopped \
+  linuxserver/letsencrypt

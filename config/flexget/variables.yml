@@ -1,0 +1,99 @@
+email:
+  from: notifymeportugal@example.com
+  password: 123password
+  to: notifymeportugal@example.com
+entry:
+  list: discover-movies
+  list2: discover-series
+  list99: reject
+imdb:
+  list: lsList
+  login: imdb@example.com
+  password: 123password
+  score: 6.4
+  username: urUsername
+  votes: 2000
+  year: 2020
+movie:
+  list: wanted
+  list2: watchlist
+plex:
+  password: password
+  server: http://192.168.8.1
+  token: XXXXXXXXXXXXX
+  username: username
+quality:
+  movies: 720p+ webrip+ h264+
+  series: 720p hdtv+ h264
+radarr:
+  key: XXXXXXXXXXXXXX
+  url: http://thirsty_fermat
+rss:
+  oldurl2: https://rarbgproxied.org/rssdd.php?categories=14;15;16;17;21;22;42;44;45;46;47;48
+  oldurl3: https://yts.lt/rss
+  url1: https://rarbg.to/rssdd.php
+  url2: https://rarbg.to/rssdd.php?categories=14;15;16;17;21;22;42;44;45;46;47;48
+  url3: https://yts.mx/rss
+  url4: https://www.limetorrents.info/rss/16/
+  url5: https://zooqle.com/search?q=1080p+after%3A1W+category%3AMovies&fmt=rss
+  url6: http://showrss.info/user/239238.rss?magnets=true&namespaces=true&name=null&quality=any&re=yes
+rssMovies:
+  url1: https://movieweb.com/rss/new-movies/
+  url10: https://www.cinemablend.com/rss/topic/previews/movies
+  url11: https://www.imdb.com/list/ls016522954/
+  url2: https://www.fandango.com/rss/newmovies.rss
+  url3: https://www.fandango.com/rss/comingsoonmovies.rss
+  url4: https://trailers.apple.com/trailers/home/rss/newtrailers.rss
+  url5: https://www.metacritic.com/rss/movies
+  url6: https://www.filmjabber.com/rss/rss-news.php
+  url7: http://www.film-news.co.uk/rss/UK/reviews/All
+  url8: https://www.bigscreen.com/xml/nowshowing_new.xml
+  url9: https://www.bigscreen.com/xml/nowshowing_all.xml
+series:
+  list:
+    - Sex Education
+    - Carnival Row
+    - Game of Thrones
+    - "NCIS: Los Angeles"
+    - NCIS
+    - Chicago Med
+    - "NCIS: New Orleans"
+    - The Blacklist
+    - The Flash
+    - Hawaii Five-0
+    - The Good Doctor
+    - FBI
+    - The Rookie
+    - 9-1-1
+    - S.W.A.T.
+    - Mangun p.i.
+    - New Amsterdam
+    - Sherlock
+    - Grey's Anatomy
+  list2:
+    - Years and Years
+    - What We Do in the Shadows
+    - Love, Death & Robots
+    - "The Dark Crystal: Age of Resistance"
+    - The boys
+sonarr:
+  key: XXXXXXXXXXXX
+  url: http://elated_shtern
+subliminal:
+  addic7ed:
+    password: password
+    username: username
+  opensubtitles:
+    password: password
+    username: username
+trakt:
+  list: wanted
+  list2: pursue
+  list3: watched
+  list4: viewed
+  list5: contemplated
+  username: tugatrakt
+transmission:
+  host: hopeful_galileo
+  password: password
+  username: username

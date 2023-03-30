@@ -1,0 +1,55 @@
+# docker build -t flexget:3.1.51 .
+# flexget:3.1.51
+FROM     python:3.6-alpine
+
+# Create a user to run the application
+# id -u docker
+RUN      adduser -D -u 1000 flexget
+WORKDIR  /home/flexget
+
+# Data and config volumes
+VOLUME   /home/flexget/.flexget
+VOLUME   /home/flexget/torrents
+EXPOSE   5050/tcp
+
+RUN      apk add build-base
+# Install FlexGet
+RUN      apk --update add libxml2-dev libxslt-dev libffi-dev gcc musl-dev libgcc openssl-dev curl
+RUN      apk add jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev tiff-dev tk-dev tcl-dev
+RUN      python3 -m pip install --upgrade pip
+RUN      python3 -m pip install --upgrade Pillow
+# ARG CACHE_DATE=2016-01-01
+RUN      pip3 install -U pip && pip3 install flexget
+RUN      pip install transmissionrpc
+RUN      pip install -U transmissionrpc
+# RUN      apk add libtorrent
+#RUN      apk add apk-tools
+#RUN      apk add --no-cache boost-python@edge boost-system@edge libressl-dev@edge
+#RUN      apk add libtorrent-rasterbar
+#RUN      pip install -U python-libtorrent==1.2.2
+#RUN      pip install PyTorrent
+RUN      pip install subliminal>=2.0
+RUN      pip install transmission-rpc
+
+# Add start script
+COPY     start.sh /home/flexget/
+RUN      chmod +x ./start.sh
+#RUN      if [ -f ~/.flexget/.config-lock ] ; then rm ~/.flexget/.config-lock; fi
+#CMD      ["rm", "-rf", "~/.flexget/.config-lock"]
+#RUN      rm -rf ~/.flexget/.config-lock
+
+
+USER     flexget
+#CMD      ["./start.sh"]
+CMD      ["./start.sh","--loglevel critical"]
+#RUN      if [ -f ~/.flexget/.config-lock ] ; then rm ~/.flexget/.config-lock; fi
+#CMD      ["rm", "-rf", "~/.flexget/.config-lock"]
+#RUN      rm -rf ~/.flexget/.config-lock
+#RUN      flexget web passwd flex123get
+#CMD      ["flexget", "web", "passwd", "flex123get"]
+# docker exec flexget-docker-name flexget web passwd flex123get
+#CMD      ["flexget", "daemon", "start"]
+#RUN      if [ -f ~/.flexget/.config-lock ] ; then [rm -rf ~/.flexget/.config-lock]; fi; [flexget daemon start]
+#CMD      rm -rf ~/.flexget/.config-lock && flexget daemon start
+#RUN /bin/sh -c 'rm -rf ~/.flexget/.config-lock;'
+#ENTRYPOINT rm -rf ~/.flexget/.config-lock; flexget daemon start

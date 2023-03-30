@@ -1,0 +1,14 @@
+docker run -d \
+  -p 137:137/udp \
+  -p 138:138/udp \
+  -p 139:139 \
+  -p 445:445 \
+  -p 445:445/udp \
+  --restart='always' \
+  --hostname 'filer' \
+  -v /mnt/volume/downloads2:/share/stick2 \
+  -v /mnt/volume/downloads:/share/stick \
+  --name samba dastrasmue/rpi-samba:v3 \
+  -u "user:userpassword" \
+  -s "User (private):/share/stick/share/user:rw:user" \
+  -s "tugaplex:/share/stick2/completed:ro:"

@@ -1,0 +1,10 @@
+secrets:
+    email: {email_from: email_from@mail.mail, email_to: email_to@mail.mail, host: smtp.gmail.com, password: password_user, port: 587, username: email_from@mail.mail}
+    general: {quality_min: '720p+ !dvdrip', quality_movies: '1080p+ !dvdrip', quality_series: '720p hdtv+ h264+'}
+    imdb: {list: lsXXXXXX, min_score: 6.5, min_votes: 5000, min_year: 2020, user_id: ur1XXXXX}
+    list: {imdbPlexMovies: XXXXXXX, traktPlexMovies: XXXXXXXXX, watchlist: XXXXXXXXXX}
+    radarr: {api: XXXXXXXXXX, http: 'http://radarr', port: '7878'}
+    rss: {limetorrents: 'https://www.limetorrents.info/rss/16/', rarbgproxied: 'https://rarbgproxied.org/rssdd.php?categories=14;15;16;17;21;22;42;44;45;46;47;48', showrss: 'http://showrss.info/user/227346.rss?magnets=true&namespaces=true&name=null&quality=hd&re=null', yts: 'https://yts.lt/rss', zooqle: 'https://zooqle.com/search?q=1080p+after%3A1W+category%3AMovies&fmt=rss'}
+    trakt: {list: XXXXXXX, listget: XXXXXXXX, username: XXXXXXX}
+    transmission: {host: XXXXXXXX, password: XXXXXXXXXXX, port: 9091, username: XXXXXXXXX}
+    tv: {series: ['Sex Education', 'Carnival Row', 'Game of Thrones', 'NCIS: Los Angeles', NCIS, 'Chicago Med', 'NCIS: New Orleans', 'The Blacklist', 'The Flash', 'Hawaii Five-0', 'The Good Doctor', FBI, 'The Rookie', 9-1-1, S.W.A.T., 'Mangun p.i.', 'New Amsterdam', Sherlock, 'Grey''s Anatomy'], series2: ['Years and Years', 'What We Do in the Shadows', 'Love, Death & Robots', 'The Dark Crystal: Age of Resistance', 'The boys'], series_alt: ['The Flash 2014', 'S W A T 2017', 'Hawaii Five 0 2010'], series_not_found: ['After Life', Unbelievable, 'When They See Us', 'Our Planet']}

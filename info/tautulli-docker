@@ -1,0 +1,9 @@
+docker run -d \
+  --name=determined_mclean \
+  --restart=unless-stopped \
+  -v /mnt/S3Plus/SharedDocker/tautulli:/config \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Europe/Lisbon \
+  -p 8181:8181 \
+  tautulli/tautulli

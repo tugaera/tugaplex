@@ -1,0 +1,255 @@
+web_server: 
+#  bind: 0.0.0.0
+#  port: 3539
+#  ssl_certificate: '/etc/ssl/private/myCert.pem'
+#  ssl_private_key: '/etc/ssl/private/myKey.key'
+  web_ui: yes
+#  base_url: /foo
+#  run_v2: yes # http://0.0.0.0:5050/v2
+
+variables: yes
+
+templates:
+  tv:
+#    manipulate:
+#      - title: &the
+#          replace:
+#            regexp: '^The\W'
+#            format: ''
+#      - filename: *the
+#      - series_name: *the
+    private_torrents: no
+#    download: /home/flexget/torrents/{{series_name}}
+    series:
+      settings:
+        tv:
+#          exact: yes
+          # propers: 3 days
+          propers: 12 hours
+          # quality: 720p+ hdtv+ h264+
+          quality: "{? secrets.general.quality_series ?}"
+          set:
+            path: /data/completed/SERIES/{{series_name}}
+      tv: "{? secrets.tv.series ?}"
+      
+  transmissionrpc:
+    transmission:
+      enabled: yes
+      host: "{? secrets.transmission.host ?}"
+      port: "{? secrets.transmission.port ?}"
+      username: "{? secrets.transmission.username ?}"
+      password: "{? secrets.transmission.password ?}"
+#      removewhendone: no
+      add_paused: no # yes
+
+  imdbMinRating:
+    imdb_lookup: yes
+    quality: "{? secrets.general.quality_movies ?}"
+    list_match:
+      from:
+        - movie_list: "{? secrets.list.imdbPlexMovies ?}"
+        - movie_list: "{? secrets.list.traktPlexMovies ?}"
+    imdb: 
+      min_score: "{? secrets.imdb.min_score ?}"
+      min_year: "{? secrets.imdb.min_year ?}"
+      min_votes: "{? secrets.imdb.min_votes ?}"
+      reject_genres:
+        - Documentary
+        - Animation
+    proper_movies: 24 hours    
+    list_add:
+      - movie_list: "{? secrets.list.watchlist ?}"
+    seen_movies:
+      matching: strict
+      scope: local # limit it to the current task
+
+  reject_entries:
+    regexp:
+      reject:
+        - (s|d)ub(s|bed)?\b: {from: title}                    # Block any subbed/dubbed/etc videos
+        - \b(duo|tri|quadri|tetra|penta)logy\b: {from: title} # Block series, only accept one at a time
+        - \b3-?D\b: {from: title}                             # I don't have any 3D displays
+        - \btrailer\b: {from: title}                          # I've gotten a few trailers that matched as movies. VERY annoying
+        - \bR5\b: {from: title}                               # The following are poor quality types that somehow got through the quality
+        - \bWEBSCR\b: {from: title}                           # features usually due to the title including a keyword like "720p" as well
+        - AC3: {from: title}                                  # Titles with AC3 are usually annoying P2P groups.
+
+schedules:
+#  - tasks: 'task-a'
+#    schedule:
+#      minute: 00
+#      hour: 00
+#  - tasks: [download_multi_rss]
+#    interval:
+#      hours: 1
+#  - tasks: [populate_imdbPlexMovies, populate_traktPlexMovies]
+#    schedule:
+#      hour: 8-20/4
+  - tasks: daily-email
+    interval:
+      days: 1
+  - tasks: [trakt_multi_rss] # [radarr_multi_rss]
+    interval:
+      hours: 1
+
+tasks:
+  task-a:
+    digest: daily email
+    priority: 1
+    rss: "{? secrets.rss.showrss ?}"
+    template: 
+      - tv
+      - transmissionrpc
+
+  populate_imdbPlexMovies:
+    imdb_watchlist:
+      user_id: "{? secrets.imdb.user_id ?}"
+      list: "{? secrets.imdb.list ?}"
+#      force_language: pt-pt # Optional - Force Specified Language
+    accept_all: yes
+    list_add:
+      - movie_list: '{? secrets.list.imdbPlexMovies ?}'
+      
+  populate_traktPlexMovies:
+    trakt_list:
+      username: "{? secrets.trakt.username ?}"
+      list: "{? secrets.trakt.list ?}"
+      type: movies 
+    accept_all: yes
+    list_add:
+      - movie_list: "{? secrets.list.traktPlexMovies ?}"
+      
+  download_imdbPlexMovies:
+    rss: "{? secrets.rss.yts ?}"
+    quality: "{? secrets.general.quality_movies ?}"
+    imdb_lookup: yes
+    list_match:
+      from:
+        - movie_list: "{? secrets.list.imdbPlexMovies ?}"
+#    download: ~/watchdir/
+    template: transmissionrpc
+    
+  download_traktPlexMovies:
+    rss: "{? secrets.rss.yts ?}"
+    quality: "{? secrets.general.quality_movies ?}"
+    imdb_lookup: yes
+    list_match:
+      from:
+        - movie_list: "{? secrets.list.traktPlexMovies ?}"
+#    download: ~/watchdir/
+    template: transmissionrpc
+    
+  download_imdbMinRating:
+    priority: 10
+    rss: "{? secrets.rss.rarbgproxied ?}"
+    imdb_lookup: yes
+    quality: "{? secrets.general.quality_movies ?}"
+    list_match:
+      from:
+        - movie_list: "{? secrets.list.imdbPlexMovies ?}"
+        - movie_list: "{? secrets.list.traktPlexMovies ?}"
+    imdb: 
+      min_score: "{? secrets.imdb.min_score ?}"
+      min_year: "{? secrets.imdb.min_year ?}"
+      min_votes: "{? secrets.imdb.min_votes ?}"
+      reject_genres:
+        - Documentary
+        - Animation
+    proper_movies: 24 hours    
+    list_add:
+      - movie_list: "{? secrets.list.watchlist ?}"
+    seen_movies:
+      matching: strict
+      scope: local
+    template: transmissionrpc
+
+  download_rarbg:
+    priority: 21
+    rss: "{? secrets.rss.rarbgproxied ?}"
+    template: 
+      - imdbMinRating
+      - transmissionrpc
+      
+  download_multi_rss:
+    digest: daily email
+    inputs:
+      - rss: "{? secrets.rss.rarbgproxied ?}"
+      - rss: "{? secrets.rss.yts ?}"
+    template: 
+      - imdbMinRating
+      - transmissionrpc
+      - reject_entries
+    transmission:
+      path: /data/completed/MOVIES
+      
+  radarr_multi_rss:
+#    digest: daily email
+    inputs:
+      - rss: "{? secrets.rss.rarbgproxied ?}"
+      - rss: "{? secrets.rss.yts ?}"
+    template: 
+      - imdbMinRating
+      - reject_entries
+    list_add:
+      - radarr_list:
+          base_url: "{? secrets.radarr.http ?}"
+          api_key: "{? secrets.radarr.api ?}"
+          port: "{? secrets.radarr.port ?}"
+          
+  trakt_multi_rss:
+#    digest: daily email
+    inputs:
+      - rss: "{? secrets.rss.rarbgproxied ?}"
+      - rss: "{? secrets.rss.yts ?}"
+    template: 
+      - imdbMinRating
+      - reject_entries
+    list_add:
+      - trakt_list:
+          account: "{? secrets.trakt.username ?}"
+          username: "{? secrets.trakt.username ?}"
+          list: "{? secrets.trakt.listget ?}"
+          type: movies
+    
+  some_task:
+    trakt_lookup:
+      username: my_trakt_tv_username
+    if:
+      - trakt_watched: reject
+      
+  movies search:
+    trakt_lookup: yes  # can also use imdb_lookup or tmdb_lookup
+    priority: 10 # run after the movie queue fill task
+    discover:
+      what:
+        - movie_list: watchlist
+      from:
+        - piratebay: yes
+      interval: 7 days
+    torrent_alive: 10 # Will reject results with less than 10 seeds
+    quality: dvdrip+ # Make sure no screeners or cams are downloaded
+    list_match:
+      from:
+        - movie_list: watchlist
+    transmission: yes # You could use another output plugin instead of this (deluge, download)
+    
+  daily-email:
+    interval: 1 days
+    from_digest:
+      list: daily email
+      #restore_state: yes
+    seen: no
+#    seen: local
+    accept_all: yes
+    notify:
+      task:
+        template: html  # Optional, if you want html instead of plain text
+        via:
+          - email:
+              from: "{? secrets.email.email_from ?}"
+              to: "{? secrets.email.email_to ?}"
+              smtp_host: "{? secrets.email.host ?}"
+              smtp_port: "{? secrets.email.port ?}"
+              smtp_username: "{? secrets.email.username ?}"
+              smtp_password: "{? secrets.email.password ?}"
+              html: yes # To parse template as HTML

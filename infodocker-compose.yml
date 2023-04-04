@@ -298,7 +298,7 @@ services:
       PLEX_CLAIM_FILE: $PLEX_CLAIM
       PLEX_UID: $PUID
       PLEX_GID: $PGID
-      ADVERTISE_IP: "http://$SERVER_IP:32400/,$PLEX_EXTERNAL_DOMAIN"
+      ADVERTISE_IP: "$PLEX_EXTERNAL_DOMAIN,http://$SERVER_IP:32400/"
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -322,6 +322,9 @@ services:
     # For Static IP
       npm_proxy:
         ipv4_address: 192.168.89.250 # You can specify a static IP
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
     cap_add:
       - NET_ADMIN
     devices:
@@ -413,13 +416,19 @@ services:
   # TransmissionBT - Torrent Downloader
   # For Proxmox LXC Containers - https://pve.proxmox.com/wiki/OpenVPN_in_LXC
   transmission-vpn:
-    <<: *common-keys-apps-t2 # See EXTENSION FIELDS at the top
+    # <<: *common-keys-apps-t2 # See EXTENSION FIELDS at the top
+    # <<: *common-keys-apps # See EXTENSION FIELDS at the top
     image: haugene/transmission-openvpn:latest
     container_name: transmission-vpn
     restart: unless-stopped
     #networks:
       #npm_proxy:
-        #ipv4_address: 192.168.89.169
+    networks:
+      t2_proxy:
+        ipv4_address: 192.168.90.169
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
     ports:
       - "9091:9091"
     cap_add:
@@ -428,11 +437,11 @@ services:
       - /dev/net/tun
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - $S3PLUSDIR/SharedDocker/transmission-vpn/config:/config
-      - $S3PLUSDIR/SharedFolder/media:/data
+      - $S3PLUSDIR/SharedDocker/transmission-vpn:/config
+      - $S3PLUSDIR/SharedDocker/transmission-vpn/data:/data
       - $S3PLUSDIR/SharedFolder/media/completed:/data/completed
-      - $S3PLUSDIR/SharedFolder/media/completed/tuga:/data/completed/tuga
-      - $S3PLUSDIR/SharedFolder/media/incomplete:/data/incomplete
+      # - $S3PLUSDIR/SharedFolder/media/completed/tuga:/data/completed/tuga
+      # - $S3PLUSDIR/SharedFolder/media/incomplete:/data/incomplete
     environment:
       <<: *default-tz-puid-pgid
       OPENVPN_PROVIDER: SURFSHARK
@@ -483,6 +492,9 @@ services:
     network_mode: "service:gluetun"
     # ports:
     #   - "$QBITTORRENT_PORT:8080" # Explosed via gluetun
+    #dns:
+      #- 1.1.1.1
+      #- 1.0.0.1
     volumes:
       - $S3PLUSDIR/SharedDocker/qbittorrent:/config
       - $S3PLUSDIR/SharedFolder/media:/downloads # Ensure that the downloads folder is set to /data/downloads in qBittorrent

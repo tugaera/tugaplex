@@ -224,7 +224,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       <<: *default-tz-puid-pgid-t2
-      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
 
   # phpMyAdmin - Database management
   # Create a new user with admin privileges. Cannot login as MySQL root for some reason.

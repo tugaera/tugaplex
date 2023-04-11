@@ -243,7 +243,7 @@ services:
       - "traefik.http.routers.phpmyadmin-rtr.entrypoints=https"
       - "traefik.http.routers.phpmyadmin-rtr.rule=Host(`pma.$DOMAINNAME_CLOUD_SERVER`)"
       ## Middlewares
-      - "traefik.http.routers.phpmyadmin-rtr.middlewares=chain-oauth@file"
+      - "traefik.http.routers.phpmyadmin-rtr.middlewares=chain-basic-auth@file"
       ## HTTP Services
       - "traefik.http.routers.phpmyadmin-rtr.service=phpmyadmin-svc"
       - "traefik.http.services.phpmyadmin-svc.loadbalancer.server.port=80"
@@ -279,7 +279,7 @@ services:
       - "traefik.http.routers.guacamole-rtr.entrypoints=https"
       - "traefik.http.routers.guacamole-rtr.rule=Host(`guac.$DOMAINNAME_CLOUD_SERVER`)"
       ## Middlewares
-      - "traefik.http.routers.guacamole-rtr.middlewares=chain-oauth@file,add-guacamole"
+      - "traefik.http.routers.guacamole-rtr.middlewares=chain-basic-auth@file,add-guacamole"
       - "traefik.http.middlewares.add-guacamole.addPrefix.prefix=/guacamole"
       ## HTTP Services
       - "traefik.http.routers.guacamole-rtr.service=guacamole-svc"

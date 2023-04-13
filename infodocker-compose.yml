@@ -575,6 +575,7 @@ services:
       - $S3PLUSDIR/SharedFolder/media:/downloads # Ensure that the downloads folder is set to /data/downloads in qBittorrent
       - $S3PLUSDIR/SharedFolder/media/completed:/downloads/completed
       - $S3PLUSDIR/SharedFolder/media/incomplete:/downloads/incomplete
+      - $MYPASSPORTDIR/sharedfolder/torrent:/downloads2
     environment:
       <<: *default-tz-puid-pgid
       UMASK_SET: 002

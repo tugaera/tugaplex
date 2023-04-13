@@ -366,6 +366,7 @@ services:
     volumes:
       - $S3PLUSDIR/SharedDocker/plexms:/config
       - $MYPASSPORTDIR/sharedfolder/media:/media
+      - $MYPASSPORTDIR/sharedfolder/torrent:/others
       - /dev/shm:/transcode
     environment:
       TZ: $TZ

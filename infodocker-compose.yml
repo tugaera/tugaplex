@@ -430,7 +430,7 @@ services:
       - "traefik.http.routers.gluetun-qbittorrent-rtr.entrypoints=https"
       - "traefik.http.routers.gluetun-qbittorrent-rtr.rule=Host(`qbit.$DOMAINNAME_CLOUD_SERVER`)" # qBittorrent
       ## Middlewares
-      - "traefik.http.routers.gluetun-qbittorrent-rtr.middlewares=chain-oauth@file" # qBittorrent
+      - "traefik.http.routers.gluetun-qbittorrent-rtr.middlewares=chain-basic-auth@file" # qBittorrent
       ## HTTP Services
       - "traefik.http.routers.gluetun-qbittorrent-rtr.service=gluetun-svc" # qBittorrent
       - "traefik.http.services.gluetun-svc.loadbalancer.server.port=8080" # qBittorrent

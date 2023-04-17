@@ -390,14 +390,15 @@ services:
       
   # Gluetun - VPN Client for Docker Containers and More
   gluetun:
+    <<: *common-keys-core-t2 # See EXTENSION FIELDS at the top
     image: qmcgaw/gluetun
     container_name: gluetun
     restart: always
     # For Static IP
     networks:
     # For Static IP
-      npm_proxy:
-        ipv4_address: 192.168.89.250 # You can specify a static IP
+      #npm_proxy:
+        #ipv4_address: 192.168.89.250 # You can specify a static IP
     dns:
       - 1.1.1.1
       - 1.0.0.1
@@ -422,7 +423,17 @@ services:
       # VPN_TYPE: openvpn
       # OPENVPN_USER: $FASTESTVPN_USERNAME
       # OPENVPN_USER: $FASTESTVPN_PASSWORD 
-      
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.gluetun-qbittorrent-rtr.entrypoints=https"
+      - "traefik.http.routers.gluetun-qbittorrent-rtr.rule=Host(`qbit.$DOMAINNAME_CLOUD_SERVER`)" # qBittorrent
+      ## Middlewares
+      - "traefik.http.routers.gluetun-qbittorrent-rtr.middlewares=chain-oauth@file" # qBittorrent
+      ## HTTP Services
+      - "traefik.http.routers.gluetun-qbittorrent-rtr.service=gluetun-svc" # qBittorrent
+      - "traefik.http.services.gluetun-svc.loadbalancer.server.port=8080" # qBittorrent
+
   # Bazarr - Subtitle Management
   bazarr:
     <<: *common-keys-media # See EXTENSION FIELDS at the top

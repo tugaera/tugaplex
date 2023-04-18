@@ -500,6 +500,31 @@ services:
       - $S3PLUSDIR/SharedDocker/prowlarr:/config
     environment:
       <<: *default-tz-puid-pgid
+
+  overseerr:
+    <<: *common-keys-media-t2 # See EXTENSION FIELDS at the top
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    #networks:
+      #npm_proxy:
+        #ipv4_address: 192.168.89.155
+    ports:
+      - 5055:5055
+    volumes:
+      - $S3PLUSDIR/SharedDocker/overseerr:/config
+    environment:
+      <<: *default-tz-puid-pgid
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.overseerr-vpn-rtr.entrypoints=https"
+      - "traefik.http.routers.overseerr-vpn-rtr.rule=Host(`over.$DOMAINNAME_CLOUD_SERVER`)"
+      ## Middlewares
+      - "traefik.http.routers.portainer-rtr.middlewares=chain-basic-auth@file"
+      # - "traefik.http.routers.portainer-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.overseerr-vpn-rtr.service=overseerr-vpn-svc"
+      - "traefik.http.services.overseerr-vpn-svc.loadbalancer.server.port=5055"
       
   # TransmissionBT - Torrent Downloader
   # For Proxmox LXC Containers - https://pve.proxmox.com/wiki/OpenVPN_in_LXC

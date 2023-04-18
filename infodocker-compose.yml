@@ -670,3 +670,12 @@ services:
       - $S3PLUSDIR/SharedDocker/flexget:/config        # required
       - $S3PLUSDIR/SharedFolder/media:/downloads
       - $MYPASSPORTDIR/sharedfolder/media:/media
+
+  cloudflare-ddns:
+    image: oznu/cloudflare-ddns:latest
+    restart: always
+    environment:
+      - API_KEY=$CLOUDFLARE_API_KEY
+      - ZONE=$DOMAINNAME_CLOUD_SERVER
+      #- SUBDOMAIN=subdomain
+      #- PROXIED=false

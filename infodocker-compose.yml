@@ -678,4 +678,4 @@ services:
       - API_KEY=$CLOUDFLARE_API_KEY_DNS
       - ZONE=$DOMAINNAME_CLOUD_SERVER
       #- SUBDOMAIN=subdomain
-      #- PROXIED=false
+      - PROXIED=true

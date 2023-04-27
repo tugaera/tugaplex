@@ -704,3 +704,18 @@ services:
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped
+    
+  # xTeve - Plex IPTV proxy
+  xteve:
+    <<: *common-keys-media-t2 # See EXTENSION FIELDS at the top
+    image: alturismo/xteve
+    container_name: xteve
+    hostname: xteve
+    ports:
+      - "34400:34400"
+      - "1901:1900" #1900 used by Plex
+    environment:
+      <<: *default-tz-puid-pgid
+    volumes:
+      - $S3PLUSDIR/SharedDocker/xteve:/config:rw
+      - /dev/shm:/tmp/xteve

@@ -46,6 +46,11 @@ x-common-keys-apps: &common-keys-apps
     - no-new-privileges:true
   restart: unless-stopped
  
+x-common-keys-apps-no-network: &common-keys-apps-no-network
+  security_opt:
+    - no-new-privileges:true
+  restart: unless-stopped
+
 # Keys common to some of the services in media-services.txt
 x-common-keys-media: &common-keys-media
   networks:
@@ -453,7 +458,7 @@ services:
       - "traefik.http.routers.bazarr-rtr.entrypoints=https"
       - "traefik.http.routers.bazarr-rtr.rule=Host(`bazarr.$DOMAINNAME_CLOUD_SERVER`)"
       ## Middlewares
-      - "traefik.http.routers.bazarr-rtr.middlewares=chain-oauth@file"
+      - "traefik.http.routers.bazarr-rtr.middlewares=chain-basic-auth@file"
       ## HTTP Services
       - "traefik.http.routers.bazarr-rtr.service=bazarr-svc"
       - "traefik.http.services.bazarr-svc.loadbalancer.server.port=6767"
@@ -641,7 +646,7 @@ services:
       
   # qBittorrent - Torrent downloader
   qbittorrent:
-    <<: *common-keys-apps # See EXTENSION FIELDS at the top
+    <<: *common-keys-apps-no-network # See EXTENSION FIELDS at the top
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     network_mode: "service:gluetun"

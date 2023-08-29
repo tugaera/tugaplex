@@ -258,7 +258,7 @@ services:
     <<: *common-keys-apps-t2 # See EXTENSION FIELDS at the top
     image: guacamole/guacd
     container_name: guacd
-    restart: unless-stopped
+    restart: no
 
     
   # Guacamole - Remote desktop, SSH, on Telnet on any HTML5 Browser
@@ -267,6 +267,7 @@ services:
     <<: *common-keys-apps-t2 # See EXTENSION FIELDS at the top
     image: guacamole/guacamole:latest
     container_name: guacamole
+    restart: no
     networks:
       - t2_proxy
       - default
@@ -710,6 +711,30 @@ services:
     environment:
       <<: *default-tz-puid-pgid
       UMASK_SET: 002
+
+  transmission:
+    # <<: *common-keys-apps-no-network # See EXTENSION FIELDS at the top
+    <<: *common-keys-apps-t2
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    environment:
+      <<: *default-tz-puid-pgid
+      # - TRANSMISSION_WEB_HOME= #optional
+      # - USER= #optional
+      # - PASS= #optional
+      # - WHITELIST= #optional
+      # - PEERPORT= #optional
+      # - HOST_WHITELIST= #optional
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - $S3PLUSDIR/SharedDocker/transmission-novpn:/config
+      - $S3PLUSDIR/SharedFolder/media/completed:/downloads
+    # network_mode: "service:gluetun"
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: unless-stopped
 
   # flexget - automtion
   flexget:

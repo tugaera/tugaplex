@@ -26,3 +26,6 @@ UUID=[UUID] /mnt/usb1 [TYPE] defaults,auto,users,rw,nofail,noatime 0 0
 
 
 UUID=02dd8c9f-d592-48cf-a7a0-d0680dda448c /mnt/S3Plus ext4 defaults,auto,users,rw,nofail,umask=000,x-systemd.device-timeout=30 0 0
+
+
+https://dannyda.com/2020/08/26/how-to-passthrough-hdd-ssd-physical-disks-to-vm-on-proxmox-vepve/

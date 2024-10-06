@@ -29,3 +29,8 @@ UUID=02dd8c9f-d592-48cf-a7a0-d0680dda448c /mnt/S3Plus ext4 defaults,auto,users,r
 
 
 https://dannyda.com/2020/08/26/how-to-passthrough-hdd-ssd-physical-disks-to-vm-on-proxmox-vepve/
+
+
+PROXMOX
+
+https://pve.proxmox.com/wiki/Passthrough_Physical_Disk_to_Virtual_Machine_(VM)

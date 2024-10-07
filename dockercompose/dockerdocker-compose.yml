@@ -22,6 +22,7 @@ include:
   - qbittorrent.yml
   - transmission.yml
   # PVRS
+  - prowlarr.yml
   - radarr.yml
   - sonarr.yml
   - bazarr.yml

@@ -1,0 +1,18 @@
+# BASED ON smarthomebeginner.com
+########################### NETWORKS
+networks:
+  default:
+    driver: bridge
+  socket_proxy:
+    name: socket_proxy
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.91.0/24
+ 
+include:
+  ########################### SERVICES
+ 
+  # CORE
+  - socket-proxy.yml
+  - portainer.yml

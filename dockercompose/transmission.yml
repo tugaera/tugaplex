@@ -1,0 +1,23 @@
+services:
+  # Transmission
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    # networks:
+      # - default
+  	network_mode: "service:gluetun"
+    volumes:
+      - $DOCKERDIR/appdata/transmission:/config
+      - $DATADIR/downloads:/downloads # Ensure that downloads folder is set to /data/downloads in qBittorrent
+      # - $DATADIR/watch:/watch
+    # ports:
+      # - 9091:9091
+      # - 51413:51413
+      # - 51413:51413/udp
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID

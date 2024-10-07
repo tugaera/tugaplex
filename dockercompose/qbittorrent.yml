@@ -9,7 +9,7 @@ services:
     # profiles: ["apps", "downloads", "all"]
     # networks:
       # - default
-	  network_mode: "service:gluetun"
+    network_mode: "service:gluetun"
     # ports:
       # - "8081:8080"
     volumes:

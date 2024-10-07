@@ -1,3 +1,4 @@
+
 mkdir /mnt/S3Plus/media
 mkdir /mnt/S3Plus/docker
 
@@ -25,3 +26,5 @@ sudo docker compose -f /mnt/S3Plus/docker/docker-compose.yml up -d
 
 sudo nano -f /mnt/S3Plus/socket-proxy.yml
 sudo nano -f /mnt/S3Plus/portainer.yml
+
+# Based on UDMS - smarthomebeginner.com

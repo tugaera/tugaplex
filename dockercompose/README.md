@@ -1,3 +1,9 @@
+## Mount
+```
+UUID=f0d37516-8f9d-4277-b8bd-b7e344a8db73 /mnt/S3Plus ext4 defaults,auto,users,rw,nofail,x-systemd.device-timeout=30 0 0
+//192.168.88.XXX/MyPassport/sharedfolder /mnt/MyPassport cifs uid=1000,gid=1000,username=USERHERE,password=PASSWORDHERE 0 0
+```
+## Docker
 ```
 mkdir /mnt/S3Plus/media
 mkdir /mnt/S3Plus/docker

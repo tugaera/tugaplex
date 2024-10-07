@@ -16,3 +16,13 @@ include:
   # CORE
   - socket-proxy.yml
   - portainer.yml
+  # DOWNLOADERS
+  #- sabnzbd.yml
+  - gluetun.yml
+  - qbittorrent.yml
+  - transmission.yml
+  # PVRS
+  - radarr.yml
+  - sonarr.yml
+  - bazarr.yml
+  - tautulli.yml

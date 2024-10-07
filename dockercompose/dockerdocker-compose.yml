@@ -26,3 +26,4 @@ include:
   - sonarr.yml
   - bazarr.yml
   - tautulli.yml
+  - overseerr.yml

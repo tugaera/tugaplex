@@ -5,9 +5,14 @@ services:
     cap_add:
       - NET_ADMIN
     ports: #make sure to include these for qbittorrent to work
-	  - 8081:8080
+      # qbittorrent 
+      - 8081:8080
       - 6881:6881
-      - 6881:6881/udp    
+      - 6881:6881/udp
+      # transmission
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
     environment:
 	  - VPN_SERVICE_PROVIDER=surfshark
       - VPN_TYPE=wireguard

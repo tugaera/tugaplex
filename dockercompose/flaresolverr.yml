@@ -1,0 +1,19 @@
+services:
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    # profiles: ["media", "arrs", "all"]
+    networks:
+      - default
+    ports:
+      - "8191:8191"
+    volumes:
+      - $DOCKERDIR/appdata/sonar:/config
+      - $MEDIADIR/tv:/data/shows
+      - $DATADIR/downloads:/data/downloads
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      LOG_LEVEL=info

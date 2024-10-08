@@ -10,10 +10,5 @@ services:
       - default
     ports:
       - "8191:8191"
-    volumes:
-      - $DOCKERDIR/appdata/sonar:/config
-      - $MEDIADIR/tv:/data/shows
-      - $DATADIR/downloads:/data/downloads
-      - "/etc/localtime:/etc/localtime:ro"
     environment:
-      LOG_LEVEL=info
+      - LOG_LEVEL=info

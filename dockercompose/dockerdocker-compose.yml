@@ -21,8 +21,9 @@ include:
   - gluetun.yml
   - qbittorrent.yml
   - transmission.yml
-  # PVRS
+  - flaresolverr.yml
   - prowlarr.yml
+  # PVRS
   - radarr.yml
   - sonarr.yml
   - bazarr.yml

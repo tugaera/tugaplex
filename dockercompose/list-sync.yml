@@ -14,7 +14,7 @@ services:
       - $DOCKERDIR/appdata/list-sync:/usr/src/app/data
       # - "/etc/localtime:/etc/localtime:ro"
     environment:
-	  TERM: xterm-256color
+      TERM: xterm-256color
       # TZ: $TZ
       # PUID: $PUID
       # PGID: $PGID

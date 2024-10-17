@@ -1,0 +1,23 @@
+services:
+  flexget:
+    image: lscr.io/linuxserver/flexget:latest
+    container_name: flexget
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    # profiles: ["media", "arrs", "all"]
+    networks:
+      - default
+    ports:
+      - "5050:5050"
+    volumes:
+      - $DOCKERDIR/appdata/flexget:/config
+      # - /path/to/downloads:/data #optional
+    environment:
+      - TZ: $TZ
+      - PUID: $PUID
+      - PGID: $PGID
+      - FG_LOG_LEVEL=info
+      - FG_LOG_FILE=/config/flexget.log
+      - FG_CONFIG_FILE=/config/.flexget/config.yml
+      # - FG_WEBUI_PASSWORD=info #optional

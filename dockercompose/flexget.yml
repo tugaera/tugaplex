@@ -14,10 +14,10 @@ services:
       - $DOCKERDIR/appdata/flexget:/config
       # - /path/to/downloads:/data #optional
     environment:
-      - TZ: $TZ
-      - PUID: $PUID
-      - PGID: $PGID
-      - FG_LOG_LEVEL=info
-      - FG_LOG_FILE=/config/flexget.log
-      - FG_CONFIG_FILE=/config/.flexget/config.yml
-      # - FG_WEBUI_PASSWORD=info #optional
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+      FG_LOG_LEVEL: info
+      FG_LOG_FILE: /config/flexget.log
+      FG_CONFIG_FILE: /config/.flexget/config.yml
+      # FG_WEBUI_PASSWORD: info #optional

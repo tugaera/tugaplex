@@ -27,5 +27,8 @@ include:
   - radarr.yml
   - sonarr.yml
   - bazarr.yml
+  # EXTRA
   - tautulli.yml
   - overseerr.yml
+  - list-sync.yml
+  - flexget.yml
